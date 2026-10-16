@@ -224,7 +224,7 @@
       background: white;
       border-radius: 12px;
       width: 90%;
-      max-width: 700px;
+      max-width: 720px;
       max-height: 85vh;
       overflow-y: auto;
       padding: 24px;
@@ -236,9 +236,8 @@
     .form-group input, .form-group textarea, .form-group select {
       width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
     }
-    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
     
-    /* Rich Text Controls */
     .toolbar {
       background: #f1f5f9;
       padding: 6px;
@@ -262,7 +261,7 @@
       border: 1px solid var(--border);
       border-radius: 0 0 6px 6px;
       padding: 10px;
-      min-height: 90px;
+      min-height: 80px;
       background: white;
       outline: none;
     }
@@ -408,7 +407,7 @@
     </div>
   </div>
 
-  <!-- ADMIN EDIT MODAL WITH RICH TEXT & LINK CONTROLS -->
+  <!-- ADMIN EDIT MODAL WITH STANDARDIZED SECTIONS -->
   <div id="adminModal" class="modal-overlay">
     <div class="modal-card">
       <h3>⚙️ Dashboard Content Manager</h3>
@@ -444,7 +443,6 @@
         <input type="text" id="editEmail">
       </div>
 
-      <!-- Rich Text Editor for Paragraph Content -->
       <div class="form-group">
         <label>Overview Paragraph (Highlight text to format)</label>
         <div class="toolbar">
@@ -455,16 +453,29 @@
         <div id="editOverviewRich" class="editor-box" contenteditable="true"></div>
       </div>
 
-      <!-- Dedicated Link & Resource Inputs -->
+      <!-- Dedicated Document Link Inputs -->
       <div class="form-group">
-        <label>Document & Google Drive Links</label>
+        <label>📂 Essential Documents & Drives</label>
         <div id="linkInputsContainer"></div>
         <button type="button" class="btn-secondary" onclick="addLinkInputField()" style="margin-top: 6px; font-size: 0.8rem;">+ Add Document Link</button>
       </div>
 
+      <!-- Dedicated Officer Roles Input -->
       <div class="form-group">
-        <label>Standard Operating Procedures (One per line)</label>
-        <textarea id="editProcedures" rows="5"></textarea>
+        <label>👔 Officer & Lead Roles (One role per line)</label>
+        <textarea id="editOfficers" rows="3" placeholder="e.g. Chair: Leads meetings and oversees team..."></textarea>
+      </div>
+
+      <!-- Dedicated Responsibilities Input -->
+      <div class="form-group">
+        <label>🎯 Core Responsibilities (One per line)</label>
+        <textarea id="editResponsibilities" rows="4"></textarea>
+      </div>
+
+      <!-- Dedicated Procedures Input -->
+      <div class="form-group">
+        <label>📋 Standard Operating Procedures (One per line)</label>
+        <textarea id="editProcedures" rows="4"></textarea>
       </div>
 
       <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
@@ -514,21 +525,21 @@
         </div>`;
       }
 
-      if(item.officers) {
+      if(item.officers && item.officers.length > 0) {
         html += `<div class="section-block">
-          <h3 class="section-title">👔 Officer Roles & Operational Directives</h3>
+          <h3 class="section-title">👔 Officer & Lead Roles</h3>
           <ul>${item.officers.map(o => `<li>${o}</li>`).join('')}</ul>
         </div>`;
       }
 
-      if(item.responsibilities) {
+      if(item.responsibilities && item.responsibilities.length > 0) {
         html += `<div class="section-block">
           <h3 class="section-title">🎯 Core Responsibilities</h3>
           <ul>${item.responsibilities.map(r => `<li>${r}</li>`).join('')}</ul>
         </div>`;
       }
 
-      if(item.procedures) {
+      if(item.procedures && item.procedures.length > 0) {
         html += `<div class="section-block">
           <h3 class="section-title">📋 Standard Operating Procedures</h3>
           <ul>${item.procedures.map(p => `<li>${p}</li>`).join('')}</ul>
@@ -634,6 +645,9 @@
       document.getElementById('editTitle').value = item.title || '';
       document.getElementById('editEmail').value = item.email || '';
       document.getElementById('editOverviewRich').innerHTML = item.overview || '';
+      
+      document.getElementById('editOfficers').value = item.officers ? item.officers.join('\n') : '';
+      document.getElementById('editResponsibilities').value = item.responsibilities ? item.responsibilities.join('\n') : '';
       document.getElementById('editProcedures').value = item.procedures ? item.procedures.join('\n') : '';
 
       const linkContainer = document.getElementById('linkInputsContainer');
@@ -652,6 +666,12 @@
       data[key].title = document.getElementById('editTitle').value;
       data[key].email = document.getElementById('editEmail').value;
       data[key].overview = document.getElementById('editOverviewRich').innerHTML;
+
+      const rawOfficers = document.getElementById('editOfficers').value;
+      data[key].officers = rawOfficers.split('\n').filter(line => line.trim() !== '');
+
+      const rawResponsibilities = document.getElementById('editResponsibilities').value;
+      data[key].responsibilities = rawResponsibilities.split('\n').filter(line => line.trim() !== '');
 
       const rawProcedures = document.getElementById('editProcedures').value;
       data[key].procedures = rawProcedures.split('\n').filter(line => line.trim() !== '');
@@ -707,7 +727,7 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: `CMS Update: Updated ${data[key].title} procedures`,
+            message: `CMS Update: Standardized ${data[key].title} sections`,
             content: encodedContent,
             sha: metaData.sha
           })
