@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organization of Virginia Homeschoolers - Operations Dashboard</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --header-bg: #0f172a;
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --accent-badge: #dbeafe;
+      --accent-badge-text: #1e40af;
+      --text: #0f172a;
+      --subtext: #475569;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 24px; line-height: 1.6; }
+    
+    header { 
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); 
+      color: white;
+      padding: 24px 32px; 
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-top: 2px; }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .tab-bar { display: flex; gap: 8px; background: rgba(255, 255, 255, 0.15); padding: 4px; border-radius: 8px; }
+    .tab-btn { 
+      padding: 8px 18px; 
+      background: transparent; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      color: #cbd5e1; 
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover { color: white; }
+    .tab-btn.active { background: white; color: var(--accent); box-shadow: var(--shadow-sm); }
+
+    .admin-btn {
+      padding: 8px 16px;
+      background: #f59e0b;
+      color: #0f172a;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .admin-btn:hover { background: #d97706; color: white; }
+
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+
+    .dashboard-container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; height: calc(100vh - 180px); min-height: 600px; }
+    
+    .sidebar { 
+      background: var(--card-bg); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      padding: 16px; 
+      overflow-y: auto; 
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .search-box { 
+      width: 100%; 
+      padding: 10px 14px; 
+      margin-bottom: 12px; 
+      border: 1px solid var(--border); 
+      border-radius: 6px; 
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    
+    .quick-filters { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .filter-pill { font-size: 0.75rem; padding: 3px 8px; background: #f1f5f9; border-radius: 12px; cursor: pointer; color: var(--subtext); font-weight: 600; }
+    .filter-pill:hover { background: var(--accent-badge); color: var(--accent-badge-text); }
+
+    .node-item { 
+      cursor: pointer; 
+      padding: 8px 12px; 
+      border-radius: 6px; 
+      font-weight: 500; 
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px; 
+      transition: all 0.15s ease;
+      font-size: 0.92rem;
+    }
+    .node-item:hover { background-color: var(--accent-light); color: var(--accent); }
+    .node-item.active { background-color: var(--accent); color: white; font-weight: 600; box-shadow: var(--shadow-sm); }
+    .parent-node { font-weight: 700; margin-top: 8px; color: var(--primary); }
+    .sub-node { margin-left: 16px; font-size: 0.88rem; color: var(--subtext); }
+
+    .main-content { 
+      background: var(--card-bg); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      padding: 28px; 
+      overflow-y: auto; 
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .card-title { font-size: 1.75rem; color: var(--primary); font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .email-badge { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px; 
+      background: var(--accent-badge); 
+      color: var(--accent-badge-text); 
+      padding: 6px 12px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      margin-bottom: 20px; 
+      font-weight: 600; 
+    }
+    
+    .section-block { 
+      background: #f8fafc; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      padding: 18px 20px; 
+      margin-bottom: 20px; 
+    }
+    .section-title { 
+      font-size: 1.05rem; 
+      font-weight: 700;
+      margin-bottom: 12px; 
+      color: var(--primary); 
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    ul { margin-left: 20px; }
+    li { margin-bottom: 8px; color: #334155; }
+    a { color: var(--accent); font-weight: 500; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Native CSS Visual Org Chart */
+    .org-chart-wrapper { width: 100%; overflow-x: auto; padding: 30px 10px; }
+    .tree, .tree ul, .tree li { position: relative; margin: 0; padding: 0; list-style: none; }
+    .tree { display: flex; justify-content: center; }
+    .tree ul { display: flex; padding-top: 24px; }
+    .tree ul::before { content: ''; position: absolute; top: 0; left: 50%; width: 0; height: 24px; border-left: 2px solid #cbd5e1; }
+    .tree li { padding: 24px 12px 0 12px; text-align: center; position: relative; }
+    .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; width: 50%; height: 24px; border-top: 2px solid #cbd5e1; }
+    .tree li::after { right: auto; left: 50%; border-left: 2px solid #cbd5e1; }
+    .tree li:only-child::after, .tree li:only-child::before { display: none; }
+    .tree li:only-child { padding-top: 0; }
+    .tree li:first-child::before, .tree li:last-child::after { border: none; }
+    .tree li:last-child::before { border-right: 2px solid #cbd5e1; border-radius: 0 6px 0 0; }
+    .tree li:first-child::after { border-radius: 6px 0 0 0; }
+    
+    .chart-node { 
+      border: 1px solid var(--border); 
+      padding: 12px 16px; 
+      border-radius: 8px; 
+      background: white; 
+      display: inline-block; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+      min-width: 140px; 
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-node:hover { 
+      border-color: var(--accent); 
+      background: var(--accent-light); 
+      transform: translateY(-2px); 
+      box-shadow: var(--shadow);
+    }
+    .chart-node .title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+    .chart-node .email { font-size: 0.75rem; color: var(--subtext); margin-top: 2px; }
+
+    /* Resource Table */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    th, td { padding: 12px 16px; text-align: left; font-size: 0.9rem; }
+    th { background: #f1f5f9; color: var(--primary); font-weight: 700; border-bottom: 1px solid var(--border); }
+    td { border-bottom: 1px solid var(--border); background: white; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Admin Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 12px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: var(--subtext); }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    
+    /* Rich Text Controls */
+    .toolbar {
+      background: #f1f5f9;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      gap: 6px;
+    }
+    .tool-btn {
+      padding: 4px 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .tool-btn:hover { background: var(--accent-light); color: var(--accent); }
+    .editor-box {
+      border: 1px solid var(--border);
+      border-radius: 0 0 6px 6px;
+      padding: 10px;
+      min-height: 90px;
+      background: white;
+      outline: none;
+    }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-secondary { padding: 8px 16px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn-primary { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  </style>
+  
+  <script src="data.js"></script>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Organization of Virginia Homeschoolers</h1>
+      <p class="subtitle">Interactive Operations Handbook & Native Visual Architecture</p>
+    </div>
+    <div class="header-actions">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('explorer')">Interactive Explorer</button>
+        <button class="tab-btn" onclick="switchTab('orgchart')">Visual Org Chart</button>
+      </div>
+      <button class="admin-btn" onclick="openAdminModal()">⚙️ Edit Mode</button>
+    </div>
+  </header>
+
+  <!-- TAB 1: Explorer & Operations Panel -->
+  <div id="tab-explorer" class="view-panel active">
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search procedures, roles, emails..." onkeyup="filterTree()">
+        
+        <div class="quick-filters">
+          <span class="filter-pill" onclick="setFilter('')">All</span>
+          <span class="filter-pill" onclick="setFilter('Board')">Board</span>
+          <span class="filter-pill" onclick="setFilter('Events')">Events</span>
+          <span class="filter-pill" onclick="setFilter('PR')">PR</span>
+          <span class="filter-pill" onclick="setFilter('Tools')">Tools</span>
+        </div>
+
+        <div id="tree">
+          <div class="node-item parent-node" onclick="showDetails('board', this)"><span>🏛️ I. Board of Directors</span></div>
+          <div class="node-item parent-node" onclick="showDetails('events', this)"><span>📅 II. Events Committee</span></div>
+          <div class="tree-node">
+            <div class="node-item sub-node" onclick="showDetails('grad', this)"><span>🎓 Graduation</span></div>
+            <div class="node-item sub-node" onclick="showDetails('uncon', this)"><span>🎪 Unconvention</span></div>
+            <div class="node-item sub-node" onclick="showDetails('vworkshop', this)"><span>💻 Virtual Workshops</span></div>
+          </div>
+          <div class="node-item parent-node" onclick="showDetails('pr', this)"><span>📣 III. Public Relations</span></div>
+          <div class="tree-node">
+            <div class="node-item sub-node" onclick="showDetails('helpdesk', this)"><span>📞 Helpdesk</span></div>
+            <div class="node-item sub-node" onclick="showDetails('parchment', this)"><span>📜 Parchment Mgmt</span></div>
+            <div class="node-item sub-node" onclick="showDetails('webadmin', this)"><span>🌐 Web-Admin</span></div>
+          </div>
+          <div class="node-item parent-node" onclick="showDetails('volunteers', this)"><span>🤝 IV. Volunteer Coord.</span></div>
+          <div class="tree-node">
+            <div class="node-item sub-node" onclick="showDetails('nomcom', this)"><span>🗳️ Nominating Subcomm.</span></div>
+          </div>
+          <div class="node-item parent-node" onclick="showDetails('membership', this)"><span>💳 V. Membership Comm.</span></div>
+          <div class="node-item parent-node" onclick="showDetails('govaffairs', this)"><span>⚖️ VI. Government Affairs</span></div>
+          <div class="node-item parent-node" onclick="showDetails('news', this)"><span>📰 VII. News Committee</span></div>
+          <div class="node-item parent-node" onclick="showDetails('finance', this)"><span>📊 VIII. Finance Committee</span></div>
+          <div class="node-item parent-node" onclick="showDetails('tools', this)"><span>🛠️ Org Resources & Tools</span></div>
+        </div>
+      </div>
+
+      <div class="main-content" id="detailView">
+        <!-- Dynamic content injects here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Native Visual Org Chart -->
+  <div id="tab-orgchart" class="view-panel">
+    <div class="main-content">
+      <h2 class="card-title">Organizational Hierarchy Tree</h2>
+      <p class="subtitle" style="margin-bottom: 20px;">Click any card to view its complete operational procedures in the explorer.</p>
+      
+      <div class="org-chart-wrapper">
+        <div class="tree">
+          <ul>
+            <li>
+              <div class="chart-node" onclick="jumpTo('board')">
+                <div class="title">Board of Directors</div>
+                <div class="email">Board@...</div>
+              </div>
+              <ul>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('events')">
+                    <div class="title">Events</div>
+                    <div class="email">eventscommittee@...</div>
+                  </div>
+                  <ul>
+                    <li><div class="chart-node" onclick="jumpTo('grad')"><div class="title">Graduation</div></div></li>
+                    <li><div class="chart-node" onclick="jumpTo('uncon')"><div class="title">Unconvention</div></div></li>
+                    <li><div class="chart-node" onclick="jumpTo('vworkshop')"><div class="title">Virtual Workshops</div></div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('pr')">
+                    <div class="title">Public Relations</div>
+                    <div class="email">PublicRelations@...</div>
+                  </div>
+                  <ul>
+                    <li><div class="chart-node" onclick="jumpTo('helpdesk')"><div class="title">Helpdesk</div></div></li>
+                    <li><div class="chart-node" onclick="jumpTo('parchment')"><div class="title">Parchment</div></div></li>
+                    <li><div class="chart-node" onclick="jumpTo('webadmin')"><div class="title">Web-Admin</div></div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('volunteers')">
+                    <div class="title">Volunteer Coord.</div>
+                    <div class="email">Volunteercoordination@...</div>
+                  </div>
+                  <ul>
+                    <li><div class="chart-node" onclick="jumpTo('nomcom')"><div class="title">Nominating</div></div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('membership')">
+                    <div class="title">Membership</div>
+                    <div class="email">MembershipCommittee@...</div>
+                  </div>
+                </li>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('govaffairs')">
+                    <div class="title">Gov. Affairs</div>
+                    <div class="email">govaffairs@...</div>
+                  </div>
+                </li>
+                <li>
+                  <div class="chart-node" onclick="jumpTo('finance')">
+                    <div class="title">Finance Chair</div>
+                    <div class="email">Board Member</div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN EDIT MODAL WITH RICH TEXT & LINK CONTROLS -->
+  <div id="adminModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3>⚙️ Dashboard Content Manager</h3>
+      
+      <div class="form-group">
+        <label>Select Entity to Edit</label>
+        <select id="editKeySelect" onchange="loadEntityIntoForm()">
+          <option value="board">Board of Directors</option>
+          <option value="events">Events Committee</option>
+          <option value="grad">Graduation Subcommittee</option>
+          <option value="uncon">Unconvention Subcommittee</option>
+          <option value="vworkshop">Virtual Workshop Subcommittee</option>
+          <option value="pr">Public Relations Committee</option>
+          <option value="helpdesk">Helpdesk Subcommittee</option>
+          <option value="parchment">Parchment Subcommittee</option>
+          <option value="webadmin">Web-Admin Subcommittee</option>
+          <option value="volunteers">Volunteer Coordination</option>
+          <option value="nomcom">Nominating Subcommittee</option>
+          <option value="membership">Membership Committee</option>
+          <option value="govaffairs">Government Affairs</option>
+          <option value="news">News Committee</option>
+          <option value="finance">Finance Committee</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="editTitle">
+      </div>
+
+      <div class="form-group">
+        <label>Email Contact</label>
+        <input type="text" id="editEmail">
+      </div>
+
+      <!-- Rich Text Editor for Paragraph Content -->
+      <div class="form-group">
+        <label>Overview Paragraph (Highlight text to format)</label>
+        <div class="toolbar">
+          <button type="button" class="tool-btn" onclick="formatText('bold')"><b>B</b></button>
+          <button type="button" class="tool-btn" onclick="formatText('italic')"><i>I</i></button>
+          <button type="button" class="tool-btn" onclick="addHyperlink()">🔗 Add Link</button>
+        </div>
+        <div id="editOverviewRich" class="editor-box" contenteditable="true"></div>
+      </div>
+
+      <!-- Dedicated Link & Resource Inputs -->
+      <div class="form-group">
+        <label>Document & Google Drive Links</label>
+        <div id="linkInputsContainer"></div>
+        <button type="button" class="btn-secondary" onclick="addLinkInputField()" style="margin-top: 6px; font-size: 0.8rem;">+ Add Document Link</button>
+      </div>
+
+      <div class="form-group">
+        <label>Standard Operating Procedures (One per line)</label>
+        <textarea id="editProcedures" rows="5"></textarea>
+      </div>
+
+      <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+
+      <div class="form-group">
+        <label>GitHub Repository Owner</label>
+        <input type="text" id="ghOwner" placeholder="e.g. org-va-homeschoolers">
+      </div>
+
+      <div class="form-group">
+        <label>GitHub Repository Name</label>
+        <input type="text" id="ghRepo" placeholder="e.g. operations-dashboard">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeAdminModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveAndPublish()">💾 Commit to GitHub Pages</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = window.dashboardData || {};
+    let currentKey = 'board';
+
+    function showDetails(key, element) {
+      if(element) {
+        document.querySelectorAll('.node-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+      }
+
+      currentKey = key;
+      const item = data[key];
+      if(!item) return;
+
+      let html = `<h2 class="card-title">${item.title}</h2>`;
+      if(item.email && item.email !== "N/A") {
+        html += `<span class="email-badge">✉️ ${item.email}</span>`;
+      }
+      
+      html += `<div class="section-block"><p style="font-size: 1.05rem; color: #334155;">${item.overview}</p></div>`;
+
+      if(item.links && item.links.length > 0) {
+        html += `<div class="section-block">
+          <h3 class="section-title">📂 Essential Documents & Drives</h3>
+          <ul>${item.links.map(l => `<li><a href="${l.url}" target="_blank">${l.name}</a></li>`).join('')}</ul>
+        </div>`;
+      }
+
+      if(item.officers) {
+        html += `<div class="section-block">
+          <h3 class="section-title">👔 Officer Roles & Operational Directives</h3>
+          <ul>${item.officers.map(o => `<li>${o}</li>`).join('')}</ul>
+        </div>`;
+      }
+
+      if(item.responsibilities) {
+        html += `<div class="section-block">
+          <h3 class="section-title">🎯 Core Responsibilities</h3>
+          <ul>${item.responsibilities.map(r => `<li>${r}</li>`).join('')}</ul>
+        </div>`;
+      }
+
+      if(item.procedures) {
+        html += `<div class="section-block">
+          <h3 class="section-title">📋 Standard Operating Procedures</h3>
+          <ul>${item.procedures.map(p => `<li>${p}</li>`).join('')}</ul>
+        </div>`;
+      }
+
+      if(item.isToolsList) {
+        html += `<table>
+          <thead>
+            <tr><th>Resource / Tool</th><th>Purpose / Description</th><th>Managing Team</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Wix</strong></td><td>Website Platform</td><td>Web Admin Team</td></tr>
+            <tr><td><strong>Phone.com</strong></td><td>Helpdesk Phone Forwarding Service</td><td>Helpdesk Team (Internal)</td></tr>
+            <tr><td><strong>JotForm</strong></td><td>Forms, PDF editing, certified documents</td><td>PR / Membership / Transcripts</td></tr>
+            <tr><td><strong>Parchment</strong></td><td>Online Transcript Services</td><td>Parchment Management Subcommittee</td></tr>
+            <tr><td><strong>Google Workspace</strong></td><td>Email, Cloud Storage, AI Tools</td><td>Volunteer Coordination / Board</td></tr>
+            <tr><td><strong>Zeffy</strong></td><td>CRM and Online Donations</td><td>Membership / Treasurer</td></tr>
+            <tr><td><strong>Zoom</strong></td><td>Online Meetings</td><td>Board & Committee Chairs</td></tr>
+            <tr><td><strong>Discord</strong></td><td>Volunteer Comms & Informal Community</td><td>Volunteer Coordination / Gov Affairs</td></tr>
+            <tr><td><strong>Substack</strong></td><td>Educational Public Articles</td><td>Public Relations</td></tr>
+            <tr><td><strong>Facebook</strong></td><td>Public Social Platform & Ads</td><td>Public Relations</td></tr>
+            <tr><td><strong>Canva</strong></td><td>Design & Visual Assets Creation</td><td>Public Relations</td></tr>
+            <tr><td><strong>Mailbox</strong></td><td>10408 Courthouse Rd PMB #48 Spotsylvania VA 22553</td><td>Board Executives</td></tr>
+          </tbody>
+        </table>`;
+      }
+
+      document.getElementById('detailView').innerHTML = html;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+      
+      if(tabId === 'explorer') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-explorer').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-orgchart').classList.add('active');
+      }
+    }
+
+    function jumpTo(key) {
+      switchTab('explorer');
+      showDetails(key, null);
+    }
+
+    function filterTree() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const nodes = document.querySelectorAll('.node-item');
+      nodes.forEach(node => {
+        const text = node.innerText.toLowerCase();
+        node.style.display = text.includes(query) ? "flex" : "none";
+      });
+    }
+
+    function setFilter(category) {
+      document.getElementById('searchInput').value = category;
+      filterTree();
+    }
+
+    /* Admin Editor Functions */
+    function openAdminModal() {
+      document.getElementById('ghOwner').value = localStorage.getItem('gh_owner') || '';
+      document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
+      loadEntityIntoForm();
+      document.getElementById('adminModal').classList.add('active');
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.remove('active');
+    }
+
+    function formatText(command) {
+      document.execCommand(command, false, null);
+    }
+
+    function addHyperlink() {
+      const url = prompt("Enter the website URL or Google Doc link:");
+      if (url) {
+        document.execCommand("createLink", false, url);
+      }
+    }
+
+    function addLinkInputField(name = '', url = '') {
+      const container = document.getElementById('linkInputsContainer');
+      const row = document.createElement('div');
+      row.style.cssText = "display: flex; gap: 8px; margin-bottom: 6px;";
+      row.innerHTML = `
+        <input type="text" placeholder="Document Name" value="${name}" class="link-name" style="flex: 1;">
+        <input type="text" placeholder="URL / Link" value="${url}" class="link-url" style="flex: 2;">
+        <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; padding:0 8px; border-radius:4px; cursor:pointer;">✕</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function loadEntityIntoForm() {
+      const key = document.getElementById('editKeySelect').value;
+      const item = data[key] || {};
+      
+      document.getElementById('editTitle').value = item.title || '';
+      document.getElementById('editEmail').value = item.email || '';
+      document.getElementById('editOverviewRich').innerHTML = item.overview || '';
+      document.getElementById('editProcedures').value = item.procedures ? item.procedures.join('\n') : '';
+
+      const linkContainer = document.getElementById('linkInputsContainer');
+      linkContainer.innerHTML = '';
+      if (item.links && item.links.length > 0) {
+        item.links.forEach(l => addLinkInputField(l.name, l.url));
+      } else {
+        addLinkInputField();
+      }
+    }
+
+    async function saveAndPublish() {
+      const key = document.getElementById('editKeySelect').value;
+      if (!data[key]) data[key] = {};
+
+      data[key].title = document.getElementById('editTitle').value;
+      data[key].email = document.getElementById('editEmail').value;
+      data[key].overview = document.getElementById('editOverviewRich').innerHTML;
+
+      const rawProcedures = document.getElementById('editProcedures').value;
+      data[key].procedures = rawProcedures.split('\n').filter(line => line.trim() !== '');
+
+      const linkNames = document.querySelectorAll('.link-name');
+      const linkUrls = document.querySelectorAll('.link-url');
+      data[key].links = [];
+
+      linkNames.forEach((input, index) => {
+        const name = input.value.trim();
+        const url = linkUrls[index].value.trim();
+        if (name && url) {
+          data[key].links.push({ name: name, url: url });
+        }
+      });
+
+      const owner = document.getElementById('ghOwner').value.trim();
+      const repo = document.getElementById('ghRepo').value.trim();
+
+      if (!owner || !repo) {
+        alert("Please provide your GitHub Repository Owner and Repository Name.");
+        return;
+      }
+
+      localStorage.setItem('gh_owner', owner);
+      localStorage.setItem('gh_repo', repo);
+
+      let token = localStorage.getItem('gh_pat_token');
+      if (!token) {
+        token = prompt("Please enter your GitHub Personal Access Token (Fine-Grained PAT):");
+        if (token) localStorage.setItem('gh_pat_token', token);
+        else return;
+      }
+
+      const filePath = "data.js";
+      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+
+      try {
+        const getRes = await fetch(url, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (!getRes.ok) throw new Error("Could not access repository metadata. Check PAT token and permissions.");
+        const metaData = await getRes.json();
+
+        const fileContent = `window.dashboardData = ${JSON.stringify(data, null, 2)};`;
+        const encodedContent = btoa(unescape(encodeURIComponent(fileContent)));
+
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: `CMS Update: Updated ${data[key].title} procedures`,
+            content: encodedContent,
+            sha: metaData.sha
+          })
+        });
+
+        if (putRes.ok) {
+          alert("Success! Changes committed to GitHub. GitHub Pages will update live in ~60 seconds.");
+          closeAdminModal();
+          showDetails(key, null);
+        } else {
+          const err = await putRes.json();
+          alert(`Failed to save: ${err.message}`);
+        }
+      } catch (e) {
+        alert(`Error publishing update: ${e.message}`);
+      }
+    }
+
+    // Initial load
+    showDetails('board', document.querySelectorAll('.node-item')[0]);
+  </script>
+</body>
+</html>
