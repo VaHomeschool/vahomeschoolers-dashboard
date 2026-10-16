@@ -2,7 +2,7 @@ window.dashboardData = {
   "board": {
     "title": "Board of Directors",
     "email": "Board@vahomeschoolers.org",
-    "overview": "Oversees strategic direction, legal compliance, and financial health in alignment with organizational bylaws.",
+    "overview": "Oversees strategic direction, legal compliance, and financial health in alignment with organizational bylaws. Board Members serve a 2-year term.",
     "links": [
       {
         "name": "Mission, Vision & Guidelines",
