@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Organization of Virginia Homeschoolers - Operations Dashboard</title>
   <style>
     :root {
@@ -24,65 +24,77 @@
       --radius: 10px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 24px; line-height: 1.6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; line-height: 1.6; }
     
     header { 
       background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); 
       color: white;
-      padding: 24px 32px; 
+      padding: 18px 20px; 
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
     }
-    header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
-    header p.subtitle { color: #94a3b8; font-size: 0.95rem; margin-top: 2px; }
+    header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p.subtitle { color: #94a3b8; font-size: 0.85rem; margin-top: 2px; }
 
-    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
 
-    .tab-bar { display: flex; gap: 8px; background: rgba(255, 255, 255, 0.15); padding: 4px; border-radius: 8px; }
+    .tab-bar { display: flex; gap: 4px; background: rgba(255, 255, 255, 0.15); padding: 4px; border-radius: 8px; }
     .tab-btn { 
-      padding: 8px 18px; 
+      padding: 8px 14px; 
       background: transparent; 
       border: none; 
       border-radius: 6px; 
       cursor: pointer; 
       font-weight: 600; 
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #cbd5e1; 
       transition: all 0.2s ease;
+      min-height: 38px;
     }
-    .tab-btn:hover { color: white; }
     .tab-btn.active { background: white; color: var(--accent); box-shadow: var(--shadow-sm); }
 
     .admin-btn {
-      padding: 8px 16px;
+      padding: 8px 14px;
       background: #f59e0b;
       color: #0f172a;
       border: none;
       border-radius: 6px;
       font-weight: 700;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: background 0.2s;
+      min-height: 38px;
     }
-    .admin-btn:hover { background: #d97706; color: white; }
 
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    .dashboard-container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; height: calc(100vh - 180px); min-height: 600px; }
+    .dashboard-container { display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: calc(100vh - 160px); min-height: 550px; }
     
     .sidebar { 
       background: var(--card-bg); 
       border: 1px solid var(--border); 
       border-radius: var(--radius); 
-      padding: 16px; 
+      padding: 14px; 
       overflow-y: auto; 
       box-shadow: var(--shadow-sm);
       display: flex;
@@ -91,47 +103,45 @@
 
     .search-box { 
       width: 100%; 
-      padding: 10px 14px; 
-      margin-bottom: 12px; 
+      padding: 10px 12px; 
+      margin-bottom: 10px; 
       border: 1px solid var(--border); 
       border-radius: 6px; 
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
     }
-    .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     
-    .quick-filters { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    .filter-pill { font-size: 0.75rem; padding: 3px 8px; background: #f1f5f9; border-radius: 12px; cursor: pointer; color: var(--subtext); font-weight: 600; }
+    .quick-filters { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .filter-pill { font-size: 0.75rem; padding: 5px 10px; background: #f1f5f9; border-radius: 12px; cursor: pointer; color: var(--subtext); font-weight: 600; }
     .filter-pill:hover { background: var(--accent-badge); color: var(--accent-badge-text); }
 
     .node-item { 
       cursor: pointer; 
-      padding: 8px 12px; 
+      padding: 10px 12px; 
       border-radius: 6px; 
       font-weight: 500; 
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 2px; 
-      transition: all 0.15s ease;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
+      min-height: 40px;
     }
     .node-item:hover { background-color: var(--accent-light); color: var(--accent); }
-    .node-item.active { background-color: var(--accent); color: white; font-weight: 600; box-shadow: var(--shadow-sm); }
-    .parent-node { font-weight: 700; margin-top: 8px; color: var(--primary); }
-    .sub-node { margin-left: 16px; font-size: 0.88rem; color: var(--subtext); }
+    .node-item.active { background-color: var(--accent); color: white; font-weight: 600; }
+    .parent-node { font-weight: 700; margin-top: 6px; color: var(--primary); }
+    .sub-node { margin-left: 14px; font-size: 0.85rem; color: var(--subtext); }
 
     .main-content { 
       background: var(--card-bg); 
       border: 1px solid var(--border); 
       border-radius: var(--radius); 
-      padding: 28px; 
+      padding: 20px; 
       overflow-y: auto; 
       box-shadow: var(--shadow-sm);
     }
     
-    .card-title { font-size: 1.75rem; color: var(--primary); font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .card-title { font-size: 1.5rem; color: var(--primary); font-weight: 700; margin-bottom: 6px; }
     .email-badge { 
       display: inline-flex; 
       align-items: center; 
@@ -141,39 +151,39 @@
       padding: 6px 12px; 
       border-radius: 20px; 
       font-size: 0.85rem; 
-      margin-bottom: 20px; 
+      margin-bottom: 16px; 
       font-weight: 600; 
+      word-break: break-all;
     }
     
     .section-block { 
       background: #f8fafc; 
       border: 1px solid var(--border); 
       border-radius: 8px; 
-      padding: 18px 20px; 
-      margin-bottom: 20px; 
+      padding: 14px 16px; 
+      margin-bottom: 16px; 
     }
     .section-title { 
-      font-size: 1.05rem; 
+      font-size: 1rem; 
       font-weight: 700;
-      margin-bottom: 12px; 
+      margin-bottom: 10px; 
       color: var(--primary); 
       display: flex;
       align-items: center;
       gap: 8px;
     }
     
-    ul { margin-left: 20px; }
-    li { margin-bottom: 8px; color: #334155; }
-    a { color: var(--accent); font-weight: 500; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    ul { margin-left: 18px; }
+    li { margin-bottom: 8px; color: #334155; font-size: 0.92rem; }
+    a { color: var(--accent); font-weight: 500; text-decoration: none; word-break: break-word; }
 
-    /* Native CSS Visual Org Chart */
-    .org-chart-wrapper { width: 100%; overflow-x: auto; padding: 30px 10px; }
+    /* Native CSS Visual Org Chart Desktop */
+    .org-chart-wrapper { width: 100%; overflow-x: auto; padding: 20px 0; }
     .tree, .tree ul, .tree li { position: relative; margin: 0; padding: 0; list-style: none; }
     .tree { display: flex; justify-content: center; }
     .tree ul { display: flex; padding-top: 24px; }
     .tree ul::before { content: ''; position: absolute; top: 0; left: 50%; width: 0; height: 24px; border-left: 2px solid #cbd5e1; }
-    .tree li { padding: 24px 12px 0 12px; text-align: center; position: relative; }
+    .tree li { padding: 24px 8px 0 8px; text-align: center; position: relative; }
     .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; width: 50%; height: 24px; border-top: 2px solid #cbd5e1; }
     .tree li::after { right: auto; left: 50%; border-left: 2px solid #cbd5e1; }
     .tree li:only-child::after, .tree li:only-child::before { display: none; }
@@ -184,32 +194,26 @@
     
     .chart-node { 
       border: 1px solid var(--border); 
-      padding: 12px 16px; 
+      padding: 10px 12px; 
       border-radius: 8px; 
       background: white; 
       display: inline-block; 
       cursor: pointer; 
       transition: all 0.2s ease; 
-      min-width: 140px; 
+      min-width: 130px; 
       box-shadow: var(--shadow-sm);
     }
-    .chart-node:hover { 
-      border-color: var(--accent); 
-      background: var(--accent-light); 
-      transform: translateY(-2px); 
-      box-shadow: var(--shadow);
-    }
-    .chart-node .title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
-    .chart-node .email { font-size: 0.75rem; color: var(--subtext); margin-top: 2px; }
+    .chart-node .title { font-weight: 700; font-size: 0.85rem; color: var(--primary); }
+    .chart-node .email { font-size: 0.72rem; color: var(--subtext); margin-top: 2px; }
 
-    /* Resource Table */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-    th, td { padding: 12px 16px; text-align: left; font-size: 0.9rem; }
+    /* Tables */
+    .table-container { overflow-x: auto; width: 100%; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); min-width: 500px; }
+    th, td { padding: 10px 12px; text-align: left; font-size: 0.85rem; }
     th { background: #f1f5f9; color: var(--primary); font-weight: 700; border-bottom: 1px solid var(--border); }
     td { border-bottom: 1px solid var(--border); background: white; }
-    tr:last-child td { border-bottom: none; }
 
-    /* Admin Modal Overlay */
+    /* Admin Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -218,57 +222,71 @@
       z-index: 1000;
       justify-content: center;
       align-items: center;
+      padding: 12px;
     }
     .modal-overlay.active { display: flex; }
     .modal-card {
       background: white;
       border-radius: 12px;
-      width: 90%;
+      width: 100%;
       max-width: 720px;
-      max-height: 85vh;
+      max-height: 90vh;
       overflow-y: auto;
-      padding: 24px;
+      padding: 20px;
       box-shadow: var(--shadow-lg);
     }
-    .modal-card h3 { color: var(--primary); margin-bottom: 12px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: var(--subtext); }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; font-size: 1.2rem; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 4px; color: var(--subtext); }
     .form-group input, .form-group textarea, .form-group select {
-      width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem;
     }
-    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-group textarea { resize: vertical; min-height: 60px; }
     
-    .toolbar {
-      background: #f1f5f9;
-      padding: 6px;
-      border: 1px solid var(--border);
-      border-bottom: none;
-      border-radius: 6px 6px 0 0;
-      display: flex;
-      gap: 6px;
-    }
-    .tool-btn {
-      padding: 4px 10px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    .tool-btn:hover { background: var(--accent-light); color: var(--accent); }
-    .editor-box {
-      border: 1px solid var(--border);
-      border-radius: 0 0 6px 6px;
-      padding: 10px;
-      min-height: 80px;
-      background: white;
-      outline: none;
-    }
+    .toolbar { background: #f1f5f9; padding: 4px; border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; display: flex; gap: 4px; }
+    .tool-btn { padding: 4px 8px; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+    .editor-box { border: 1px solid var(--border); border-radius: 0 0 6px 6px; padding: 8px; min-height: 70px; background: white; outline: none; font-size: 0.88rem; }
 
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-secondary { padding: 8px 16px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .btn-primary { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .btn-secondary { padding: 8px 14px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .btn-primary { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+
+    /* =========================================
+       MOBILE & TABLET RESPONSIVE OVERRIDES
+    ========================================= */
+    @media (max-width: 768px) {
+      body { padding: 8px; }
+      header { padding: 14px; flex-direction: column; align-items: flex-start; gap: 10px; }
+      header h1 { font-size: 1.2rem; }
+      header p.subtitle { font-size: 0.8rem; }
+
+      .mobile-menu-btn { display: block; }
+      .header-actions { flex-direction: row; gap: 6px; }
+      .tab-bar { width: 100%; justify-content: space-between; }
+      .tab-btn { flex: 1; text-align: center; font-size: 0.8rem; padding: 6px 8px; }
+      .admin-btn { font-size: 0.8rem; padding: 6px 10px; width: 100%; margin-top: 4px; }
+
+      .dashboard-container { grid-template-columns: 1fr; height: auto; min-height: initial; }
+      
+      /* Sidebar Drawer on Mobile */
+      .sidebar { 
+        display: none; 
+        max-height: 400px; 
+      }
+      .sidebar.active { display: flex; }
+
+      .main-content { padding: 14px; }
+      .card-title { font-size: 1.3rem; }
+
+      /* Mobile Vertical Org Chart Tree Transformation */
+      .tree, .tree ul, .tree li { display: block; padding: 0; margin: 0; }
+      .tree ul::before, .tree li::before, .tree li::after { display: none !important; }
+      .tree ul { padding-left: 12px; border-left: 2px solid var(--accent-badge); margin-left: 12px; margin-top: 8px; }
+      .tree li { text-align: left; margin-bottom: 8px; padding: 0; }
+      .chart-node { width: 100%; text-align: left; padding: 10px; min-width: initial; }
+      
+      .modal-card { padding: 16px; max-height: 95vh; }
+    }
   </style>
   
   <script src="data.js"></script>
@@ -276,10 +294,14 @@
 <body>
 
   <header>
-    <div>
-      <h1>Organization of Virginia Homeschoolers</h1>
-      <p class="subtitle">Interactive Operations Handbook & Native Visual Architecture</p>
+    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1>Organization of Virginia Homeschoolers</h1>
+        <p class="subtitle">Interactive Operations Handbook & Mobile Architecture</p>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰ Menu</button>
     </div>
+    
     <div class="header-actions">
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('explorer')">Interactive Explorer</button>
@@ -292,7 +314,7 @@
   <!-- TAB 1: Explorer & Operations Panel -->
   <div id="tab-explorer" class="view-panel active">
     <div class="dashboard-container">
-      <div class="sidebar">
+      <div class="sidebar" id="sidebarNav">
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search procedures, roles, emails..." onkeyup="filterTree()">
         
         <div class="quick-filters">
@@ -339,7 +361,7 @@
   <div id="tab-orgchart" class="view-panel">
     <div class="main-content">
       <h2 class="card-title">Organizational Hierarchy Tree</h2>
-      <p class="subtitle" style="margin-bottom: 20px;">Click any card to view its complete operational procedures in the explorer.</p>
+      <p class="subtitle" style="margin-bottom: 16px;">Tap any card to view its complete procedures in the explorer.</p>
       
       <div class="org-chart-wrapper">
         <div class="tree">
@@ -407,7 +429,7 @@
     </div>
   </div>
 
-  <!-- ADMIN EDIT MODAL WITH STANDARDIZED SECTIONS -->
+  <!-- ADMIN EDIT MODAL -->
   <div id="adminModal" class="modal-overlay">
     <div class="modal-card">
       <h3>⚙️ Dashboard Content Manager</h3>
@@ -453,32 +475,28 @@
         <div id="editOverviewRich" class="editor-box" contenteditable="true"></div>
       </div>
 
-      <!-- Dedicated Document Link Inputs -->
       <div class="form-group">
         <label>📂 Essential Documents & Drives</label>
         <div id="linkInputsContainer"></div>
         <button type="button" class="btn-secondary" onclick="addLinkInputField()" style="margin-top: 6px; font-size: 0.8rem;">+ Add Document Link</button>
       </div>
 
-      <!-- Dedicated Officer Roles Input -->
       <div class="form-group">
-        <label>👔 Officer & Lead Roles (One role per line)</label>
-        <textarea id="editOfficers" rows="3" placeholder="e.g. Chair: Leads meetings and oversees team..."></textarea>
+        <label>👔 Officer & Lead Roles (One per line)</label>
+        <textarea id="editOfficers" rows="3"></textarea>
       </div>
 
-      <!-- Dedicated Responsibilities Input -->
       <div class="form-group">
         <label>🎯 Core Responsibilities (One per line)</label>
-        <textarea id="editResponsibilities" rows="4"></textarea>
+        <textarea id="editResponsibilities" rows="3"></textarea>
       </div>
 
-      <!-- Dedicated Procedures Input -->
       <div class="form-group">
         <label>📋 Standard Operating Procedures (One per line)</label>
-        <textarea id="editProcedures" rows="4"></textarea>
+        <textarea id="editProcedures" rows="3"></textarea>
       </div>
 
-      <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+      <hr style="margin: 14px 0; border: none; border-top: 1px solid var(--border);">
 
       <div class="form-group">
         <label>GitHub Repository Owner</label>
@@ -501,10 +519,20 @@
     const data = window.dashboardData || {};
     let currentKey = 'board';
 
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebarNav');
+      sidebar.classList.toggle('active');
+    }
+
     function showDetails(key, element) {
       if(element) {
         document.querySelectorAll('.node-item').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
+      }
+
+      // Close mobile drawer after selection on small screens
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebarNav').classList.remove('active');
       }
 
       currentKey = key;
@@ -516,7 +544,7 @@
         html += `<span class="email-badge">✉️ ${item.email}</span>`;
       }
       
-      html += `<div class="section-block"><p style="font-size: 1.05rem; color: #334155;">${item.overview}</p></div>`;
+      html += `<div class="section-block"><p style="font-size: 0.98rem; color: #334155;">${item.overview}</p></div>`;
 
       if(item.links && item.links.length > 0) {
         html += `<div class="section-block">
@@ -547,25 +575,27 @@
       }
 
       if(item.isToolsList) {
-        html += `<table>
-          <thead>
-            <tr><th>Resource / Tool</th><th>Purpose / Description</th><th>Managing Team</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>Wix</strong></td><td>Website Platform</td><td>Web Admin Team</td></tr>
-            <tr><td><strong>Phone.com</strong></td><td>Helpdesk Phone Forwarding Service</td><td>Helpdesk Team (Internal)</td></tr>
-            <tr><td><strong>JotForm</strong></td><td>Forms, PDF editing, certified documents</td><td>PR / Membership / Transcripts</td></tr>
-            <tr><td><strong>Parchment</strong></td><td>Online Transcript Services</td><td>Parchment Management Subcommittee</td></tr>
-            <tr><td><strong>Google Workspace</strong></td><td>Email, Cloud Storage, AI Tools</td><td>Volunteer Coordination / Board</td></tr>
-            <tr><td><strong>Zeffy</strong></td><td>CRM and Online Donations</td><td>Membership / Treasurer</td></tr>
-            <tr><td><strong>Zoom</strong></td><td>Online Meetings</td><td>Board & Committee Chairs</td></tr>
-            <tr><td><strong>Discord</strong></td><td>Volunteer Comms & Informal Community</td><td>Volunteer Coordination / Gov Affairs</td></tr>
-            <tr><td><strong>Substack</strong></td><td>Educational Public Articles</td><td>Public Relations</td></tr>
-            <tr><td><strong>Facebook</strong></td><td>Public Social Platform & Ads</td><td>Public Relations</td></tr>
-            <tr><td><strong>Canva</strong></td><td>Design & Visual Assets Creation</td><td>Public Relations</td></tr>
-            <tr><td><strong>Mailbox</strong></td><td>10408 Courthouse Rd PMB #48 Spotsylvania VA 22553</td><td>Board Executives</td></tr>
-          </tbody>
-        </table>`;
+        html += `<div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Resource / Tool</th><th>Purpose / Description</th><th>Managing Team</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Wix</strong></td><td>Website Platform</td><td>Web Admin Team</td></tr>
+              <tr><td><strong>Phone.com</strong></td><td>Helpdesk Phone Forwarding Service</td><td>Helpdesk Team (Internal)</td></tr>
+              <tr><td><strong>JotForm</strong></td><td>Forms, PDF editing, certified documents</td><td>PR / Membership / Transcripts</td></tr>
+              <tr><td><strong>Parchment</strong></td><td>Online Transcript Services</td><td>Parchment Management Subcommittee</td></tr>
+              <tr><td><strong>Google Workspace</strong></td><td>Email, Cloud Storage, AI Tools</td><td>Volunteer Coordination / Board</td></tr>
+              <tr><td><strong>Zeffy</strong></td><td>CRM and Online Donations</td><td>Membership / Treasurer</td></tr>
+              <tr><td><strong>Zoom</strong></td><td>Online Meetings</td><td>Board & Committee Chairs</td></tr>
+              <tr><td><strong>Discord</strong></td><td>Volunteer Comms & Informal Community</td><td>Volunteer Coordination / Gov Affairs</td></tr>
+              <tr><td><strong>Substack</strong></td><td>Educational Public Articles</td><td>Public Relations</td></tr>
+              <tr><td><strong>Facebook</strong></td><td>Public Social Platform & Ads</td><td>Public Relations</td></tr>
+              <tr><td><strong>Canva</strong></td><td>Design & Visual Assets Creation</td><td>Public Relations</td></tr>
+              <tr><td><strong>Mailbox</strong></td><td>10408 Courthouse Rd PMB #48 Spotsylvania VA 22553</td><td>Board Executives</td></tr>
+            </tbody>
+          </table>
+        </div>`;
       }
 
       document.getElementById('detailView').innerHTML = html;
@@ -629,7 +659,7 @@
     function addLinkInputField(name = '', url = '') {
       const container = document.getElementById('linkInputsContainer');
       const row = document.createElement('div');
-      row.style.cssText = "display: flex; gap: 8px; margin-bottom: 6px;";
+      row.style.cssText = "display: flex; gap: 6px; margin-bottom: 6px;";
       row.innerHTML = `
         <input type="text" placeholder="Document Name" value="${name}" class="link-name" style="flex: 1;">
         <input type="text" placeholder="URL / Link" value="${url}" class="link-url" style="flex: 2;">
@@ -727,7 +757,7 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: `CMS Update: Standardized ${data[key].title} sections`,
+            message: `CMS Update: Updated ${data[key].title} procedures`,
             content: encodedContent,
             sha: metaData.sha
           })
